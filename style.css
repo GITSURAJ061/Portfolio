@@ -22,7 +22,7 @@ nav{
 #main{
   background-color: yellow;
   height: 10vh;
-  width: 50vh;
+  width: 50vw;
  color: rgb(28, 177, 102);
   display: flex;
   align-items: center;
@@ -33,15 +33,15 @@ nav{
 
 
 #main h5{
-    size: 100vh;
-    font-weight: 100vh;
+    size: 100vw;
+    font-weight: 100vw;
       
 }
 
 #box{
     background-color: rgba(32, 27, 27, 0.24);
-    height: 400px;
-    width: 400px;
+    height: 400vh;
+    width: 400vw;
     display: flex;
     border-radius: 10px;
     align-items:center ;
