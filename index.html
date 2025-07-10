@@ -3,32 +3,522 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link
-    href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
-    rel="stylesheet"
-/>
-    <link rel="stylesheet" href="style.css">
-    
+    <title>Addictive Number Game</title>
+    <style>
+        :root {
+            --primary: #6e48aa;
+            --secondary: #9d50bb;
+            --win: #4CAF50;
+            --lose: #f44336;
+            --highlight: #FFD700;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            width: 350px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 700;
+            background: linear-gradient(to right, #ff8a00, #da1b60);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .balance {
+            color: var(--highlight);
+            font-weight: bold;
+        }
+        
+        .streak {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+        
+        .input-group {
+            margin: 20px 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+        
+        input:focus {
+            outline: 2px solid var(--secondary);
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(110, 72, 170, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result-container {
+            margin-top: 25px;
+            min-height: 100px;
+            position: relative;
+        }
+        
+        .countdown {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 5rem;
+            font-weight: bold;
+            color: var(--highlight);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .result-number {
+            font-size: 6rem;
+            text-align: center;
+            font-weight: bold;
+            margin: 20px 0;
+            animation: reveal 0.5s ease-out;
+        }
+        
+        @keyframes reveal {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .result-message {
+            text-align: center;
+            font-size: 1.3rem;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        .win {
+            color: var(--win);
+        }
+        
+        .lose {
+            color: var(--lose);
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--highlight);
+            opacity: 0;
+        }
+        
+        .bonus-offer {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            animation: glow 2s infinite alternate;
+            border: 1px solid var(--highlight);
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+            to { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+        }
+        
+        .bonus-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .bonus-buttons button {
+            flex: 1;
+            padding: 10px;
+        }
+        
+        .history {
+            display: flex;
+            gap: 5px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .history-item {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+        
+        .win-history {
+            background-color: var(--win);
+        }
+        
+        .lose-history {
+            background-color: var(--lose);
+        }
+        
+        /* Animation classes */
+        .shake {
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .jump {
+            animation: jump 0.5s;
+        }
+        
+        @keyframes jump {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+    </style>
 </head>
 <body>
-    <nav>
-<div id="left">
-    <h4>SURAJ KOLI</h4>
-</div>
+    <div class="particles" id="particles"></div>
+    
+    <div class="game-container">
+        <h1>LUCKY NUMBER</h1>
+        
+        <div class="stats">
+            <div class="balance">₹<span id="balance">100</span></div>
+            <div class="streak">🔥 <span id="streak">0</span></div>
+        </div>
+        
+        <div class="input-group">
+            <label for="bet">Your Bet</label>
+            <input type="number" id="bet" min="1" value="10">
+            
+            <label for="guess">Pick a Number (0-9)</label>
+            <input type="number" id="guess" min="0" max="9" value="0">
+            
+            <button id="play-btn">SPIN & WIN</button>
+        </div>
+        
+        <div class="result-container" id="result-container">
+            <!-- Results will appear here -->
+        </div>
+        
+        <div class="history" id="history">
+            <!-- Win/lose history dots -->
+        </div>
+        
+        <div class="bonus-offer" id="bonus-offer" style="display: none;">
+            <p>SPECIAL BONUS ROUND!</p>
+            <p>Double your next bet?</p>
+            <div class="bonus-buttons">
+                <button id="double-btn">DOUBLE</button>
+                <button id="continue-btn">CONTINUE</button>
+            </div>
+        </div>
+    </div>
 
-<div id="right">
-    <i class="ri-equal-line"></i>
-</div>
-</nav>
-
-<div id="main">
-   <h5> Welcome to 3D World </h5>
-</div>
-
-  <div id="box">
-    <H6>it's Portfolio web page 
-    </H6>
-  </div>  
+    <script>
+        // Game state
+        let balance = 100;
+        let streak = 0;
+        let currentBet = 10;
+        let gameHistory = [];
+        
+        // DOM elements
+        const balanceEl = document.getElementById('balance');
+        const streakEl = document.getElementById('streak');
+        const betInput = document.getElementById('bet');
+        const guessInput = document.getElementById('guess');
+        const playBtn = document.getElementById('play-btn');
+        const resultContainer = document.getElementById('result-container');
+        const historyEl = document.getElementById('history');
+        const bonusOffer = document.getElementById('bonus-offer');
+        const doubleBtn = document.getElementById('double-btn');
+        const continueBtn = document.getElementById('continue-btn');
+        
+        // Initialize
+        updateUI();
+        createParticles();
+        
+        // Event listeners
+        playBtn.addEventListener('click', playGame);
+        doubleBtn.addEventListener('click', doubleBet);
+        continueBtn.addEventListener('click', continueGame);
+        
+        // Main game function
+        function playGame() {
+            const bet = parseInt(betInput.value);
+            const userGuess = parseInt(guessInput.value);
+            
+            // Validate
+            if (bet > balance) {
+                showMessage("Not enough balance!", true);
+                playBtn.classList.add('shake');
+                setTimeout(() => playBtn.classList.remove('shake'), 500);
+                return;
+            }
+            
+            if (userGuess < 0 || userGuess > 9) {
+                showMessage("Pick 0-9!", true);
+                guessInput.classList.add('shake');
+                setTimeout(() => guessInput.classList.remove('shake'), 500);
+                return;
+            }
+            
+            // Disable button during animation
+            playBtn.disabled = true;
+            
+            // Show countdown
+            showCountdown(() => {
+                // Generate random number
+                const computerNumber = Math.floor(Math.random() * 10);
+                
+                // Check result
+                const isWin = userGuess === computerNumber;
+                
+                // Update balance
+                if (isWin) {
+                    const winAmount = bet * 1.05;
+                    balance += winAmount;
+                    streak++;
+                    
+                    // Show win animation
+                    showResult(computerNumber, true);
+                    showMessage(`YOU WON ₹${winAmount.toFixed(2)}!`, false);
+                    createConfetti();
+                    
+                    // Check for bonus round
+                    if (streak >= 2) {
+                        setTimeout(() => {
+                            bonusOffer.style.display = 'block';
+                        }, 1500);
+                    }
+                } else {
+                    balance -= bet;
+                    streak = 0;
+                    
+                    // Show lose animation
+                    showResult(computerNumber, false);
+                    showMessage(`You lost ₹${bet}`, true);
+                }
+                
+                // Update history
+                gameHistory.push(isWin);
+                updateHistory();
+                
+                // Update UI
+                updateUI();
+                
+                // Re-enable button
+                playBtn.disabled = false;
+            });
+        }
+        
+        // Show countdown before revealing number
+        function showCountdown(callback) {
+            resultContainer.innerHTML = '';
+            const countdownEl = document.createElement('div');
+            countdownEl.className = 'countdown';
+            resultContainer.appendChild(countdownEl);
+            
+            let count = 3;
+            countdownEl.textContent = count;
+            
+            const timer = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownEl.textContent = count;
+                    countdownEl.classList.add('jump');
+                    setTimeout(() => countdownEl.classList.remove('jump'), 300);
+                } else {
+                    clearInterval(timer);
+                    resultContainer.removeChild(countdownEl);
+                    callback();
+                }
+            }, 800);
+        }
+        
+        // Show the result number with animation
+        function showResult(number, isWin) {
+            const numberEl = document.createElement('div');
+            numberEl.className = `result-number ${isWin ? 'win' : 'lose'}`;
+            numberEl.textContent = number;
+            resultContainer.appendChild(numberEl);
+        }
+        
+        // Show win/lose message
+        function showMessage(message, isError) {
+            const messageEl = document.createElement('div');
+            messageEl.className = `result-message ${isError ? 'lose' : 'win'}`;
+            messageEl.textContent = message;
+            resultContainer.appendChild(messageEl);
+        }
+        
+        // Update UI elements
+        function updateUI() {
+            balanceEl.textContent = balance.toFixed(2);
+            streakEl.textContent = streak;
+            betInput.value = currentBet;
+        }
+        
+        // Update win/lose history dots
+        function updateHistory() {
+            historyEl.innerHTML = '';
+            gameHistory.slice(-10).forEach(result => {
+                const dot = document.createElement('div');
+                dot.className = `history-item ${result ? 'win-history' : 'lose-history'}`;
+                historyEl.appendChild(dot);
+            });
+        }
+        
+        // Bonus round functions
+        function doubleBet() {
+            currentBet *= 2;
+            bonusOffer.style.display = 'none';
+            updateUI();
+        }
+        
+        function continueGame() {
+            bonusOffer.style.display = 'none';
+        }
+        
+        // Create confetti effect
+        function createConfetti() {
+            const container = document.querySelector('.game-container');
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = -10 + 'px';
+                confetti.style.backgroundColor = getRandomColor();
+                container.appendChild(confetti);
+                
+                // Animate
+                const animation = confetti.animate([
+                    { top: '-10px', opacity: 1, transform: 'rotate(0deg)' },
+                    { top: '100%', opacity: 0, transform: 'rotate(360deg)' }
+                ], {
+                    duration: 2000 + Math.random() * 3000,
+                    easing: 'cubic-bezier(0.1, 0.8, 0.9, 1)'
+                });
+                
+                animation.onfinish = () => {
+                    confetti.remove();
+                };
+            }
+        }
+        
+        function getRandomColor() {
+            const colors = ['#FFD700', '#FF1493', '#00BFFF', '#7CFC00', '#FF4500'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+        
+        // Create background particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'absolute';
+                particle.style.width = Math.random() * 5 + 2 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.backgroundColor = 'rgba(255, 255, 255, ' + (Math.random() * 0.5 + 0.1) + ')';
+                particle.style.borderRadius = '50%';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                
+                // Animation
+                const duration = Math.random() * 20 + 10;
+                particle.animate([
+                    { transform: 'translateY(0)' },
+                    { transform: 'translateY(' + (Math.random() > 0.5 ? '-' : '') + (Math.random() * 100 + 50) + 'px)' }
+                ], {
+                    duration: duration * 1000,
+                    iterations: Infinity,
+                    direction: Math.random() > 0.5 ? 'alternate' : 'normal'
+                });
+                
+                container.appendChild(particle);
+            }
+        }
+    </script>
 </body>
 </html>
